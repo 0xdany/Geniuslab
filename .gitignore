@@ -1,0 +1,11 @@
+.env*
+!.env.example
+.next/
+node_modules/
+dist/
+coverage/
+drizzle/
+*.tsbuildinfo
+.DS_Store
+playwright-report/
+test-results/

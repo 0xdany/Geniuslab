@@ -2,7 +2,7 @@
 
 Full-stack video assessment platform for API-triggered and manually created candidate assessments.
 
-Deployed demo: `https://geniuslab-video-278560556951.us-west1.run.app`
+Deployment target: Vercel for the Next.js app, with Google Cloud Storage retained for private video storage.
 
 ## Stack
 
@@ -11,7 +11,8 @@ Deployed demo: `https://geniuslab-video-278560556951.us-west1.run.app`
 - Neon PostgreSQL with Drizzle ORM
 - Google Cloud Storage for private video files
 - Resend + React Email for invitation and completion emails
-- Cloud Run serverless deployment in GCP project `geniuslab-494619`
+- Vercel hosting for the Next.js app
+- Google Cloud project `geniuslab-494619` only for private video storage
 
 ## Local Setup
 
@@ -42,6 +43,7 @@ Required env vars are documented below and in `.env.example`. The first admin is
 | `GCP_PROJECT_ID` | GCP project id, currently `geniuslab-494619`. |
 | `GCS_BUCKET` | Private video bucket, currently `geniuslab-494619-geniuslab-videos`. |
 | `GOOGLE_SIGNING_SERVICE_ACCOUNT` | Service account used for signed GCS URLs. |
+| `GCP_SERVICE_ACCOUNT_JSON` | Full or base64-encoded service account JSON for Vercel to access/sign GCS URLs. |
 | `RESEND_API_KEY` | Resend API key. |
 | `EMAIL_FROM` | Verified Resend sender, e.g. `Geniuslab <assessments@reachout.danyraihan.dev>`. |
 | `CRON_SECRET` | Bearer token for `/api/cron/expire-assessments`. |
@@ -50,7 +52,7 @@ Google OAuth redirect URIs:
 
 ```text
 http://localhost:3000/api/auth/callback/google
-https://geniuslab-video-278560556951.us-west1.run.app/api/auth/callback/google
+https://YOUR-VERCEL-DOMAIN.vercel.app/api/auth/callback/google
 ```
 
 Add a Codespaces callback URL too if using Codespaces:
@@ -90,9 +92,18 @@ psql "$DATABASE_URL" -f sql/remove-demo-data.sql
 - Admins review completed assessments, score responses, add notes, and download individual or zipped videos.
 - External systems retrieve completed videos through signed temporary URLs.
 
-## GCP Low-Cost Deployment
+## Deployment
 
-See [`docs/gcp-provisioning.md`](docs/gcp-provisioning.md). The deployment uses Cloud Run with `min-instances=0`, `max-instances=3`, private regional GCS storage, and no Cloud SQL, GKE, VM, CDN, load balancer, VPC connector, or scheduler requirement.
+Host the Next.js application on Vercel. Keep Neon for PostgreSQL and Google Cloud Storage for private video objects.
+
+Set all variables from `.env.example` in Vercel Project Settings. On Vercel:
+
+- `APP_URL` and `BETTER_AUTH_URL` must be your Vercel URL.
+- Add the Vercel OAuth callback URL in Google Cloud Console.
+- Add the Vercel origin to `gcs-cors.json`, then apply it to the bucket.
+- Set `GCP_SERVICE_ACCOUNT_JSON` to a service account JSON with access to the video bucket.
+
+See [`docs/gcp-storage.md`](docs/gcp-storage.md) for storage-only GCP setup.
 
 ## API Docs
 
@@ -126,7 +137,7 @@ The devcontainer uses `mcr.microsoft.com/devcontainers/javascript-node:1-22-book
    gsutil cors set gcs-cors.json gs://geniuslab-494619-geniuslab-videos
    ```
 
-Codespaces URLs are unique per Codespace. The deployed Cloud Run URL is the preferred review URL; Codespaces is included to prove reproducible local setup.
+Codespaces URLs are unique per Codespace. The Vercel deployment is the preferred review URL; Codespaces is included to prove reproducible local setup.
 
 ## Verification
 
@@ -141,11 +152,9 @@ Additional checklists:
 - [`docs/qa-checklist.md`](docs/qa-checklist.md)
 - [`docs/technical-overview-script.md`](docs/technical-overview-script.md)
 
-## Cleanup
+## GCP Storage Cleanup
 
 ```bash
-gcloud run services delete geniuslab-video --region=us-west1 --project=geniuslab-494619
-gcloud artifacts repositories delete geniuslab --location=us-west1 --project=geniuslab-494619
-gcloud storage rm -r gs://geniuslab-494619-geniuslab-videos
-gcloud iam service-accounts delete geniuslab-video-runner@geniuslab-494619.iam.gserviceaccount.com --project=geniuslab-494619
+gsutil rm -r gs://geniuslab-494619-geniuslab-videos
+gcloud iam service-accounts delete geniuslab-video-storage@geniuslab-494619.iam.gserviceaccount.com --project=geniuslab-494619
 ```

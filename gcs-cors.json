@@ -1,10 +1,6 @@
 [
   {
-    "origin": [
-      "http://localhost:3000",
-      "https://geniuslab-video-278560556951.us-west1.run.app",
-      "https://geniuslab-video-2rc52koj4a-uw.a.run.app"
-    ],
+    "origin": ["http://localhost:3000"],
     "method": ["GET", "PUT", "POST", "HEAD", "OPTIONS"],
     "responseHeader": [
       "Content-Type",

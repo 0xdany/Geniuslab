@@ -5,8 +5,17 @@ import { gcpProjectId, gcsBucketName } from "@/lib/env";
 let storage: Storage | null = null;
 let auth: GoogleAuth | null = null;
 
+type ServiceAccountCredentials = {
+  client_email?: string;
+  private_key?: string;
+};
+
 export function getStorage() {
-  storage ??= new Storage({ projectId: gcpProjectId() });
+  const credentials = getServiceAccountCredentials();
+  storage ??= new Storage({
+    projectId: gcpProjectId(),
+    credentials,
+  });
   return storage;
 }
 
@@ -56,11 +65,17 @@ export async function verifyGcsObject(objectName: string) {
 }
 
 async function getIamSignedReadUrl(objectName: string, expires: number, responseDisposition?: string) {
-  auth ??= new GoogleAuth({ scopes: ["https://www.googleapis.com/auth/cloud-platform"] });
+  const credentials = getServiceAccountCredentials();
+  auth ??= new GoogleAuth({
+    scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+    credentials,
+    projectId: gcpProjectId(),
+  });
   const client = await auth.getClient();
   const serviceAccountEmail = await auth.getCredentials().then((credentials) => credentials.client_email)
     || process.env.GOOGLE_SIGNING_SERVICE_ACCOUNT
-    || `${process.env.K_SERVICE ? process.env.K_SERVICE : "geniuslab-video-runner"}@${gcpProjectId()}.iam.gserviceaccount.com`;
+    || credentials?.client_email
+    || `geniuslab-video-storage@${gcpProjectId()}.iam.gserviceaccount.com`;
   const now = new Date();
   const datestamp = formatDate(now).slice(0, 8);
   const timestamp = formatDate(now);
@@ -123,4 +138,20 @@ async function sha256Hex(value: string) {
   const data = new TextEncoder().encode(value);
   const hash = await crypto.subtle.digest("SHA-256", data);
   return Buffer.from(hash).toString("hex");
+}
+
+function getServiceAccountCredentials(): ServiceAccountCredentials | undefined {
+  const raw = process.env.GCP_SERVICE_ACCOUNT_JSON || process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (!raw) return undefined;
+  const parsed = parseJsonSecret(raw);
+  if (!parsed.client_email || !parsed.private_key) {
+    throw new Error("GCP_SERVICE_ACCOUNT_JSON must include client_email and private_key.");
+  }
+  return parsed;
+}
+
+function parseJsonSecret(raw: string): ServiceAccountCredentials {
+  const trimmed = raw.trim();
+  const json = trimmed.startsWith("{") ? trimmed : Buffer.from(trimmed, "base64").toString("utf8");
+  return JSON.parse(json) as ServiceAccountCredentials;
 }

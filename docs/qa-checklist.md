@@ -47,5 +47,5 @@ Use this checklist before recording the final demo.
 - `npm run lint` succeeds.
 - `npm test` succeeds.
 - `npm run db:migrate` succeeds against Neon.
-- Cloud Run URL serves the deployed app.
+- Vercel URL serves the deployed app.
 - GCS CORS includes local, deployed, and any Codespaces origins used for video upload testing.

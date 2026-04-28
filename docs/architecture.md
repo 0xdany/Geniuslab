@@ -27,7 +27,7 @@ Admin playback, downloads, and external retrieval use signed URLs or server-side
 
 ## Scaling Notes
 
-Direct browser-to-GCS upload avoids routing large video bodies through Cloud Run. Cloud Run handles metadata, auth, signed URLs, and finalization checks. Neon stores relational state. For higher concurrency, add background processing for transcoding, queue email retries, and introduce lifecycle policies for old video retention.
+Direct browser-to-GCS upload avoids routing large video bodies through Vercel serverless functions. The app handles metadata, auth, signed URLs, and finalization checks. Neon stores relational state. For higher concurrency, add background processing for transcoding, queue email retries, and introduce lifecycle policies for old video retention.
 
 ## API And Auditability
 

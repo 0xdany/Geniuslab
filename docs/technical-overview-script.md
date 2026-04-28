@@ -4,7 +4,7 @@ Target length: 5-10 minutes.
 
 ## Architecture
 
-This is a full-stack Next.js 16 App Router application deployed on Cloud Run. Neon PostgreSQL stores relational state through Drizzle ORM. Google Cloud Storage stores private video objects. Resend sends invitation and completion emails. Better Auth handles Google OAuth for admins.
+This is a full-stack Next.js 16 App Router application deployed on Vercel. Neon PostgreSQL stores relational state through Drizzle ORM. Google Cloud Storage stores private video objects. Resend sends invitation and completion emails. Better Auth handles Google OAuth for admins.
 
 The application has three surfaces:
 
@@ -31,7 +31,7 @@ Recording chunks are written to IndexedDB every 1-2 seconds. Chunks remain local
 
 ## Storage And Playback
 
-Videos are uploaded directly from the browser to private GCS objects through resumable upload sessions. Cloud Run creates scoped upload sessions and finalizes metadata. Admin playback uses signed inline read URLs. Downloads use separate signed attachment URLs or a server-streamed zip.
+Videos are uploaded directly from the browser to private GCS objects through resumable upload sessions. The Next.js server creates scoped upload sessions and finalizes metadata. Admin playback uses signed inline read URLs. Downloads use separate signed attachment URLs or a server-streamed zip.
 
 Object naming:
 
@@ -53,11 +53,11 @@ Candidate routes use `src/proxy.ts` for early user-agent/client-hint checks. The
 
 ## Scaling
 
-Direct browser-to-GCS upload keeps large video bodies away from Cloud Run, so Cloud Run mostly handles auth, metadata, validation, signed URLs, and finalization. For hundreds of concurrent candidates, scale Cloud Run max instances, keep Neon connection usage serverless-friendly, and add background jobs for retries/transcoding if needed.
+Direct browser-to-GCS upload keeps large video bodies away from Vercel serverless functions, so the app mostly handles auth, metadata, validation, signed URLs, and finalization. For hundreds of concurrent candidates, keep Neon connection usage serverless-friendly and add background jobs for retries/transcoding if needed.
 
 ## Cost Management
 
-Cloud Run runs with min instances `0` and max instances `3` for the demo. GCS is regional Standard storage with soft delete disabled. Future cost controls could include lifecycle deletion/archival rules, compression/transcoding, retention policies, and storage usage dashboards.
+Vercel hosts the app, while GCS is regional Standard storage with soft delete disabled. Future cost controls could include lifecycle deletion/archival rules, compression/transcoding, retention policies, and storage usage dashboards.
 
 ## Browser Compatibility
 

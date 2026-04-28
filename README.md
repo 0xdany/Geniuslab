@@ -106,6 +106,8 @@ See [`docs/demo-script.md`](docs/demo-script.md).
 
 This repo includes `.devcontainer/devcontainer.json` for Codespaces.
 
+The devcontainer uses `mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm`. Node 22 is intentionally used because it is available as a Codespaces devcontainer image and satisfies the app/runtime requirements.
+
 1. Create a Codespace from the repository.
 2. Add the values from `.env.example` as Codespaces repository secrets, or create `.env` inside the Codespace.
 3. Run:

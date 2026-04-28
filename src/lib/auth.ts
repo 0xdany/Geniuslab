@@ -20,9 +20,9 @@ const trustedOrigins = Array.from(
   new Set(
     [
       authBaseURL,
-      appUrl(),
+      process.env.APP_URL,
+      process.env.VERCEL_PROJECT_PRODUCTION_URL,
       process.env.VERCEL_URL,
-      process.env.NEXT_PUBLIC_APP_URL,
     ].map(originFrom).filter(Boolean),
   ),
 ) as string[];

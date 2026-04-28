@@ -15,7 +15,43 @@ POST /api/v1/assessments/trigger
 Idempotency-Key: optional-retry-key
 ```
 
-The payload follows `SPEC.md`: candidate fields plus assessment title, description, and inline questions.
+The payload contains candidate fields plus assessment title, description, and inline questions. Questions are not reusable templates; every request creates a candidate-specific assessment.
+
+Example:
+
+```bash
+curl -X POST "$APP_URL/api/v1/assessments/trigger" \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: stage-transition-demo-001" \
+  -d '{
+    "event": "stage_transition",
+    "timestamp": "2026-03-15T10:21:00Z",
+    "candidate": {
+      "id": "000000",
+      "name": "Jane Doe",
+      "email": "jane.doe@example.com",
+      "phone": "+1-555-123-4567",
+      "resumeUrl": "https://example.com/resume.pdf"
+    },
+    "assessment": {
+      "title": "Software Engineer Video Assessment",
+      "description": "Please answer each question concisely.",
+      "questions": [
+        {
+          "text": "Tell us about yourself and your background.",
+          "maxDurationSeconds": 120,
+          "maxAttempts": 1
+        },
+        {
+          "text": "Describe a challenging technical problem you solved recently.",
+          "maxDurationSeconds": 180,
+          "maxAttempts": 1
+        }
+      ]
+    }
+  }'
+```
 
 Success:
 
@@ -46,7 +82,15 @@ Errors use:
 }
 ```
 
-Supported errors include `UNAUTHORIZED`, `RATE_LIMITED`, `INVALID_PAYLOAD`, `IDEMPOTENCY_CONFLICT`, and `CREATE_FAILED`.
+Supported errors include:
+
+- `UNAUTHORIZED`
+- `RATE_LIMITED`
+- `INVALID_PAYLOAD`
+- `IDEMPOTENCY_CONFLICT`
+- `CREATE_FAILED`
+
+The API rate limit defaults to 60 requests per minute per API key and is configurable from admin settings.
 
 ## Retrieve Videos
 
@@ -56,6 +100,13 @@ GET /api/v1/candidates/{candidate_id}/videos
 ```
 
 Videos are returned only for `completed` or `reviewed` assessments.
+
+Example:
+
+```bash
+curl "$APP_URL/api/v1/assessments/$ASSESSMENT_ID/videos" \
+  -H "Authorization: Bearer $API_KEY"
+```
 
 ```json
 {
@@ -83,3 +134,5 @@ Videos are returned only for `completed` or `reviewed` assessments.
 ```
 
 Signed URLs are time-limited. They should not be logged or shared.
+
+Incomplete assessments return `ASSESSMENT_INCOMPLETE`. Missing assessments/candidates return `NOT_FOUND`. Missing or revoked API keys return `UNAUTHORIZED`.

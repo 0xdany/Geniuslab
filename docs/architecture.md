@@ -28,3 +28,15 @@ Admin playback, downloads, and external retrieval use signed URLs or server-side
 ## Scaling Notes
 
 Direct browser-to-GCS upload avoids routing large video bodies through Cloud Run. Cloud Run handles metadata, auth, signed URLs, and finalization checks. Neon stores relational state. For higher concurrency, add background processing for transcoding, queue email retries, and introduce lifecycle policies for old video retention.
+
+## API And Auditability
+
+External API requests use bearer API keys. Keys are stored hashed with a visible prefix, can be revoked, and record usage. Intake supports `Idempotency-Key` so upstream systems can retry safely without creating duplicate assessments. API request logs record success and failure outcomes for auditing.
+
+## Email
+
+Resend sends candidate invitation and completion emails from a verified domain. The app records provider acceptance as `sent` and provider/network failures as `failed`, which supports admin retry behavior. Delivery webhooks are intentionally outside the MVP.
+
+## Error Handling
+
+The app includes explicit states for unsupported devices, expired/submitted links, camera or microphone denial, unsupported recorder formats, upload failures with locally preserved chunks, incomplete video retrieval, and signed URL refresh by page reload.

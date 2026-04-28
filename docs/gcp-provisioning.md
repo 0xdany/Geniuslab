@@ -83,13 +83,24 @@ gcloud run services update geniuslab-video \
 
 Set secrets as Cloud Run environment variables for the demo footprint:
 
+- `APP_URL`
+- `BETTER_AUTH_URL`
 - `DATABASE_URL`
 - `BETTER_AUTH_SECRET`
 - `INITIAL_ADMIN_EMAIL`
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
+- `GCP_PROJECT_ID`
+- `GCS_BUCKET`
+- `GOOGLE_SIGNING_SERVICE_ACCOUNT`
 - `RESEND_API_KEY`
 - `EMAIL_FROM`
 - `CRON_SECRET`
+
+Current deployed URL:
+
+```text
+https://geniuslab-video-278560556951.us-west1.run.app
+```
 
 Cost guardrails: Cloud Run min instances stay at `0`, max instances at `3`, and there is no always-on compute.

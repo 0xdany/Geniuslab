@@ -34,6 +34,7 @@ Required env vars are documented below and in `.env.example`. The first admin is
 | Variable | Purpose |
 | --- | --- |
 | `APP_URL` | Public app origin. Local default is `http://localhost:3000`. |
+| `NEXT_PUBLIC_APP_URL` | Public browser-visible app origin. Use the same value as `APP_URL`. |
 | `BETTER_AUTH_URL` | Auth callback origin. Usually same as `APP_URL`. |
 | `DATABASE_URL` | Neon PostgreSQL connection string. |
 | `BETTER_AUTH_SECRET` | Random secret for Better Auth sessions. Generate with `openssl rand -base64 32`. |
@@ -98,10 +99,11 @@ Host the Next.js application on Vercel. Keep Neon for PostgreSQL and Google Clou
 
 Set all variables from `.env.example` in Vercel Project Settings. On Vercel:
 
-- `APP_URL` and `BETTER_AUTH_URL` must be your Vercel URL.
+- `APP_URL`, `NEXT_PUBLIC_APP_URL`, and `BETTER_AUTH_URL` must be your Vercel URL, for example `https://geniuslab-dany.vercel.app`.
 - Add the Vercel OAuth callback URL in Google Cloud Console.
 - Add the Vercel origin to `gcs-cors.json`, then apply it to the bucket.
 - Set `GCP_SERVICE_ACCOUNT_JSON` to a service account JSON with access to the video bucket.
+- If Vercel env vars are changed after a deployment, trigger a fresh production redeploy.
 
 See [`docs/gcp-storage.md`](docs/gcp-storage.md) for storage-only GCP setup.
 

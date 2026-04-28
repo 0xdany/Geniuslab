@@ -15,7 +15,7 @@ function originFrom(value: string | undefined) {
   }
 }
 
-const authBaseURL = process.env.BETTER_AUTH_URL || appUrl();
+const authBaseURL = appUrl();
 const trustedOrigins = Array.from(
   new Set(
     [

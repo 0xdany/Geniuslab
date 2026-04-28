@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { assessmentQuestions, candidates } from "@/db/schema";
+import { assessmentQuestions, candidates, questionResponses } from "@/db/schema";
 import { getCandidateSession } from "@/lib/candidate-session";
 import { badRequest, unauthorized } from "@/lib/permissions";
 import { expireAssessmentIfNeeded } from "@/lib/status";
@@ -21,6 +21,7 @@ export async function GET() {
     })
     .from(assessmentQuestions)
     .where(eq(assessmentQuestions.assessmentId, assessment.id));
+  const responses = await db.select().from(questionResponses).where(eq(questionResponses.assessmentId, assessment.id));
 
   return NextResponse.json({
     success: true,
@@ -32,6 +33,7 @@ export async function GET() {
       status: assessment.status,
       expiresAt: assessment.expiresAt.toISOString(),
       questionCount: questions.length,
+      completedCount: responses.length,
       questions: questions.map((q) => ({
         questionNumber: q.questionNumber,
         maxDurationSeconds: q.maxDurationSeconds,

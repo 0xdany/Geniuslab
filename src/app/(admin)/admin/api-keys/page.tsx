@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { apiKeys } from "@/db/schema";
+import { apiKeyUsage, apiKeys } from "@/db/schema";
 import { ApiKeyManager } from "@/components/admin/api-key-manager";
 import { createApiKey } from "@/lib/api-keys";
 import { requireAdmin } from "@/lib/admin-access";
@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function ApiKeysPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const params = await searchParams;
   const keys = await db.select().from(apiKeys).orderBy(desc(apiKeys.createdAt));
+  const usage = await db.select().from(apiKeyUsage).orderBy(desc(apiKeyUsage.createdAt)).limit(25);
 
   async function createAction(formData: FormData) {
     "use server";
@@ -31,7 +32,7 @@ export default async function ApiKeysPage({ searchParams }: { searchParams: Prom
       <h1 className="text-2xl font-semibold">API keys</h1>
       <p className="mt-1 text-sm text-muted-foreground">Generate, revoke, and audit external integration keys.</p>
       <div className="mt-6">
-        <ApiKeyManager keys={keys} createdKey={params.created} createAction={createAction} revokeAction={revokeAction} />
+        <ApiKeyManager keys={keys} usage={usage} createdKey={params.created} createAction={createAction} revokeAction={revokeAction} />
       </div>
     </div>
   );

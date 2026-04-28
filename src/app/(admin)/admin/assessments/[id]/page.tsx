@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
   assessmentQuestions,
@@ -60,6 +60,15 @@ export default async function AssessmentReviewPage({ params }: { params: Promise
       return { ...row, playbackSigned, downloadSigned };
     }),
   );
+  const reviewQueue = await db
+    .select({ id: assessments.id, candidateName: candidates.name })
+    .from(assessments)
+    .innerJoin(candidates, eq(candidates.id, assessments.candidateId))
+    .where(inArray(assessments.status, ["completed", "reviewed"]))
+    .orderBy(desc(assessments.submittedAt));
+  const currentIndex = reviewQueue.findIndex((item) => item.id === id);
+  const previousAssessment = currentIndex > 0 ? reviewQueue[currentIndex - 1] : null;
+  const nextAssessment = currentIndex >= 0 && currentIndex < reviewQueue.length - 1 ? reviewQueue[currentIndex + 1] : null;
 
   async function saveReview(formData: FormData) {
     "use server";
@@ -85,6 +94,22 @@ export default async function AssessmentReviewPage({ params }: { params: Promise
     redirect(`/admin/assessments/${id}`);
   }
 
+  async function saveOverallReview(formData: FormData) {
+    "use server";
+    const currentAdmin = await requireAdmin();
+    const overallScore = formData.get("overallScore") ? String(formData.get("overallScore")) : null;
+    const summaryNotes = String(formData.get("summaryNotes") || "");
+    await db
+      .insert(assessmentReviews)
+      .values({ assessmentId: id, reviewerUserId: currentAdmin.user.id, overallScore, summaryNotes, updatedAt: new Date() })
+      .onConflictDoNothing();
+    await db
+      .update(assessments)
+      .set({ overallScore, summaryNotes, updatedAt: new Date() })
+      .where(eq(assessments.id, id));
+    redirect(`/admin/assessments/${id}`);
+  }
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -95,6 +120,16 @@ export default async function AssessmentReviewPage({ params }: { params: Promise
           {candidate.resumeUrl ? <a className="text-sm text-primary" href={candidate.resumeUrl}>Resume</a> : null}
         </div>
         <div className="flex items-center gap-3">
+          {previousAssessment ? (
+            <Link href={`/admin/assessments/${previousAssessment.id}`} className="text-sm font-medium text-primary">
+              Previous
+            </Link>
+          ) : null}
+          {nextAssessment ? (
+            <Link href={`/admin/assessments/${nextAssessment.id}`} className="text-sm font-medium text-primary">
+              Next
+            </Link>
+          ) : null}
           <Badge>{assessment.status}</Badge>
           <BulkDownloadButton assessmentId={assessment.id} />
           {assessment.status === "completed" ? (
@@ -106,6 +141,29 @@ export default async function AssessmentReviewPage({ params }: { params: Promise
       <Card>
         <h2 className="text-lg font-semibold">{assessment.title}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{assessment.description || "No description provided."}</p>
+      </Card>
+
+      <Card>
+        <h2 className="text-lg font-semibold">Overall review</h2>
+        <form action={saveOverallReview} className="mt-3 grid gap-3 md:grid-cols-[140px_1fr_auto]">
+          <input
+            name="overallScore"
+            type="number"
+            min={1}
+            max={5}
+            step="0.5"
+            defaultValue={assessment.overallScore ?? ""}
+            placeholder="Score"
+            className="h-10 rounded-md border bg-white px-3 text-sm"
+          />
+          <textarea
+            name="summaryNotes"
+            defaultValue={assessment.summaryNotes ?? ""}
+            placeholder="Summary notes"
+            className="min-h-10 rounded-md border bg-white px-3 py-2 text-sm"
+          />
+          <Button type="submit">Save summary</Button>
+        </form>
       </Card>
 
       <div className="space-y-4">

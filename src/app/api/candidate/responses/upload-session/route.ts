@@ -17,8 +17,8 @@ export async function POST(request: NextRequest) {
   const extension = String(body.fileExtension || extensionForMimeType(mimeType));
 
   const [attempt] = await db.select().from(questionAttempts).where(eq(questionAttempts.id, attemptId)).limit(1);
-  if (!attempt || attempt.assessmentId !== session.assessment.id || attempt.status !== "recording") {
-    return badRequest("INVALID_ATTEMPT", "Upload session can only be created for the active attempt.", 409);
+  if (!attempt || attempt.assessmentId !== session.assessment.id || !["recording", "upload_pending", "failed"].includes(attempt.status)) {
+    return badRequest("INVALID_ATTEMPT", "Upload session can only be created for a pending recording.", 409);
   }
   const [question] = await db.select().from(assessmentQuestions).where(eq(assessmentQuestions.id, attempt.questionId)).limit(1);
   const objectName = `assessments/${attempt.assessmentId}/questions/${question?.questionNumber ?? 0}/attempts/${attempt.id}/recording.${extension}`;

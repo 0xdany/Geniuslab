@@ -100,6 +100,8 @@ GET /api/v1/candidates/{candidate_id}/videos
 ```
 
 Videos are returned only for `completed` or `reviewed` assessments.
+The same API-key rate limit applies to retrieval requests. The default is 60 requests per minute per API key.
+All retrieval attempts are recorded in the API audit log.
 
 Example:
 

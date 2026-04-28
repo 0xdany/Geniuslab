@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const attemptId = String(body.attemptId || "");
   const uploadSessionId = String(body.uploadSessionId || "");
+  const finalizeResponse = body.finalizeResponse !== false;
   try {
     const video = await finalizeGcsObject({
       attemptId,
@@ -18,6 +19,9 @@ export async function POST(request: NextRequest) {
       durationSeconds: Number(body.durationSeconds || 0) || undefined,
     });
     if (!video) throw new Error("Video was already finalized or could not be finalized.");
+    if (!finalizeResponse) {
+      return NextResponse.json({ success: true, videoId: video.id });
+    }
     const [response] = await db
       .insert(questionResponses)
       .values({

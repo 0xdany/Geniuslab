@@ -6,8 +6,8 @@ export default function UnsupportedPage() {
       <Card>
         <h1 className="text-2xl font-semibold">Please use a laptop or desktop computer</h1>
         <p className="mt-2 text-muted-foreground">
-          This assessment requires a camera, microphone, and desktop browser. Phones and tablets cannot access the
-          questions or recording interface.
+          This assessment needs a desktop browser with a camera and microphone. To keep the experience fair and reliable,
+          phones and tablets cannot open the questions or recording screen.
         </p>
       </Card>
     </main>

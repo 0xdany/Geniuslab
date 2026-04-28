@@ -4,6 +4,8 @@ Full-stack video assessment platform for API-triggered and manually created cand
 
 Deployment target: Vercel for the Next.js app, with Google Cloud Storage retained for private video storage.
 
+Deployment URL: add the active Vercel production URL here before submission.
+
 ## Stack
 
 - Next.js 16 App Router, React 19, TypeScript, npm
@@ -74,6 +76,10 @@ Seed demo data:
 ```bash
 npm run db:seed
 ```
+
+The seed creates 15 assessments across invited, in-progress, completed, reviewed, and expired states. For playable review
+videos, complete one seeded or newly created assessment through the candidate flow so real private GCS objects are created
+for the review and download screens.
 
 Remove only seeded demo data:
 

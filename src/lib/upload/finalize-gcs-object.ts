@@ -45,5 +45,7 @@ export async function finalizeGcsObject(params: {
     .set({ status: "finalized", stoppedAt: new Date(), durationSeconds: params.durationSeconds })
     .where(eq(questionAttempts.id, attempt.id));
 
-  return video;
+  if (video) return video;
+  const [existing] = await db.select().from(videoObjects).where(eq(videoObjects.attemptId, attempt.id)).limit(1);
+  return existing;
 }

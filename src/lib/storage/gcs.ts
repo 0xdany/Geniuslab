@@ -1,6 +1,6 @@
 import { Storage } from "@google-cloud/storage";
 import { GoogleAuth } from "google-auth-library";
-import { gcpProjectId, gcsBucketName } from "@/lib/env";
+import { appUrl, gcpProjectId, gcsBucketName } from "@/lib/env";
 
 let storage: Storage | null = null;
 let auth: GoogleAuth | null = null;
@@ -26,7 +26,7 @@ export function getVideoBucket() {
 export async function createResumableUploadSession(objectName: string, contentType: string, metadata: Record<string, string>) {
   const file = getVideoBucket().file(objectName);
   const [uri] = await file.createResumableUpload({
-    origin: process.env.APP_URL || "http://localhost:3000",
+    origin: appUrl(),
     metadata: {
       contentType,
       metadata,

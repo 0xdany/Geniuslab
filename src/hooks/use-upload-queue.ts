@@ -5,6 +5,22 @@ import type { IDBPDatabase } from "idb";
 
 let dbPromise: Promise<IDBPDatabase> | null = null;
 
+export type PendingRecording = {
+  id: string;
+  attemptId: string;
+  questionId: string;
+  questionNumber: number;
+  questionText: string;
+  maxDurationSeconds: number | null;
+  maxAttempts: number;
+  attemptNumber: number;
+  mimeType: string;
+  durationSeconds?: number;
+  uploaded?: boolean;
+  createdAt: number;
+  updatedAt: number;
+};
+
 function getRecordingDb() {
   if (typeof indexedDB === "undefined") {
     throw new Error("IndexedDB is not available in this browser context.");
@@ -13,6 +29,9 @@ function getRecordingDb() {
     upgrade(db) {
       if (!db.objectStoreNames.contains("chunks")) {
         db.createObjectStore("chunks", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("pending")) {
+        db.createObjectStore("pending", { keyPath: "id" });
       }
     },
   });
@@ -36,6 +55,45 @@ export async function clearRecordingChunks(attemptId: string) {
   await Promise.all(keys.filter((key) => String(key).startsWith(`${attemptId}:`)).map((key) => db.delete("chunks", key)));
 }
 
+export async function savePendingRecording(recording: Omit<PendingRecording, "id" | "createdAt" | "updatedAt">) {
+  const db = await getRecordingDb();
+  const now = Date.now();
+  const existing = await db.get("pending", recording.attemptId) as PendingRecording | undefined;
+  const value: PendingRecording = {
+    ...existing,
+    ...recording,
+    id: recording.attemptId,
+    createdAt: existing?.createdAt ?? now,
+    updatedAt: now,
+  };
+  await db.put("pending", value);
+  return value;
+}
+
+export async function listPendingRecordings() {
+  const db = await getRecordingDb();
+  const all = await db.getAll("pending") as PendingRecording[];
+  return all.sort((a, b) => b.updatedAt - a.updatedAt);
+}
+
+export async function getPendingRecording(attemptId: string) {
+  const db = await getRecordingDb();
+  return db.get("pending", attemptId) as Promise<PendingRecording | undefined>;
+}
+
+export async function clearPendingRecording(attemptId: string) {
+  const db = await getRecordingDb();
+  await db.delete("pending", attemptId);
+}
+
 export function useUploadQueue() {
-  return { saveRecordingChunk, loadRecordingChunks, clearRecordingChunks };
+  return {
+    saveRecordingChunk,
+    loadRecordingChunks,
+    clearRecordingChunks,
+    savePendingRecording,
+    listPendingRecordings,
+    getPendingRecording,
+    clearPendingRecording,
+  };
 }

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { assessments, candidates, emailMessages } from "@/db/schema";
+import { assessmentQuestions, assessmentTokens, assessments, candidates, emailMessages } from "@/db/schema";
 import { requireAdmin } from "@/lib/admin-access";
 import { appUrl } from "@/lib/env";
 import { sendCompletionEmail, sendInvitationEmail } from "@/lib/email/resend";
 import { badRequest } from "@/lib/permissions";
+import { randomToken, sha256 } from "@/lib/crypto";
 
 export async function POST(request: NextRequest) {
   await requireAdmin();
@@ -17,13 +18,22 @@ export async function POST(request: NextRequest) {
   if (message.kind === "completion") {
     await sendCompletionEmail({ assessmentId: assessment.id, to: candidate.email, candidateName: candidate.name, title: assessment.title });
   } else {
+    const rawToken = randomToken(32);
+    await db
+      .insert(assessmentTokens)
+      .values({
+        assessmentId: assessment.id,
+        tokenHash: sha256(`assessment-token:${rawToken}`),
+        expiresAt: assessment.expiresAt,
+      });
+    const questions = await db.select().from(assessmentQuestions).where(eq(assessmentQuestions.assessmentId, assessment.id));
     await sendInvitationEmail({
       assessmentId: assessment.id,
       to: candidate.email,
       candidateName: candidate.name,
       title: assessment.title,
-      link: `${appUrl()}/admin/assessments/${assessment.id}`,
-      questionCount: 0,
+      link: `${appUrl()}/assess/${rawToken}`,
+      questionCount: questions.length,
       expiresAt: assessment.expiresAt,
     });
   }

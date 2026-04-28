@@ -26,6 +26,9 @@ export async function getCurrentAdmin() {
       .values({ userId: user.id, role: "admin" })
       .onConflictDoNothing()
       .returning();
+    if (invite && !invite.acceptedAt) {
+      await db.update(adminInvites).set({ acceptedAt: new Date() }).where(eq(adminInvites.id, invite.id));
+    }
     return { session, user, profile: created ?? profile };
   }
 

@@ -7,11 +7,13 @@ export function ApiKeyManager({
   createdKey,
   createAction,
   revokeAction,
+  usage,
 }: {
   keys: Array<{ id: string; name: string; prefix: string; status: string; lastUsedAt: Date | null; createdAt: Date }>;
   createdKey?: string;
   createAction: (formData: FormData) => void | Promise<void>;
   revokeAction: (formData: FormData) => void | Promise<void>;
+  usage: Array<{ id: string; apiKeyId: string | null; route: string; method: string; statusCode: number; createdAt: Date }>;
 }) {
   return (
     <div className="space-y-5">
@@ -54,6 +56,37 @@ export function ApiKeyManager({
                 </td>
               </tr>
             ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="overflow-hidden rounded-lg border bg-white">
+        <div className="border-b px-4 py-3">
+          <h2 className="font-medium">Recent API usage</h2>
+          <p className="text-sm text-muted-foreground">Latest authenticated requests across active and revoked keys.</p>
+        </div>
+        <table className="w-full text-left text-sm">
+          <thead className="bg-muted text-xs uppercase text-muted-foreground">
+            <tr>
+              <th className="px-4 py-3">Time</th>
+              <th className="px-4 py-3">Method</th>
+              <th className="px-4 py-3">Route</th>
+              <th className="px-4 py-3">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {usage.map((event) => (
+              <tr key={event.id} className="border-t">
+                <td className="px-4 py-3">{event.createdAt.toLocaleString()}</td>
+                <td className="px-4 py-3">{event.method}</td>
+                <td className="px-4 py-3"><code>{event.route}</code></td>
+                <td className="px-4 py-3">{event.statusCode}</td>
+              </tr>
+            ))}
+            {usage.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">No API usage yet.</td>
+              </tr>
+            ) : null}
           </tbody>
         </table>
       </div>

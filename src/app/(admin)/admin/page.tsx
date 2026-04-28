@@ -16,8 +16,14 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     params.source ? eq(assessments.sourceType, params.source as "manual" | "api") : undefined,
     params.from ? gte(assessments.createdAt, new Date(params.from)) : undefined,
     params.to ? lte(assessments.createdAt, new Date(params.to)) : undefined,
+    params.minScore ? gte(assessments.overallScore, params.minScore) : undefined,
+    params.maxScore ? lte(assessments.overallScore, params.maxScore) : undefined,
   ].filter(Boolean);
-  const sort = params.sort === "candidate" ? asc(candidates.name) : desc(assessments.submittedAt);
+  const sort =
+    params.sort === "candidate" ? asc(candidates.name)
+      : params.sort === "status" ? asc(assessments.status)
+        : params.sort === "score" ? desc(assessments.overallScore)
+          : desc(assessments.submittedAt);
   const rows = await db
     .select({
       id: assessments.id,

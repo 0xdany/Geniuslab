@@ -102,6 +102,8 @@ GET /api/v1/candidates/{candidate_id}/videos
 Videos are returned only for `completed` or `reviewed` assessments.
 The same API-key rate limit applies to retrieval requests. The default is 60 requests per minute per API key.
 All retrieval attempts are recorded in the API audit log.
+Signed URLs use the admin-configurable `signedUrlTtlMinutes` setting. The default is 60 minutes.
+The audit log stores route/status/error metadata only; signed URL values are returned to the caller but are not stored in request logs.
 
 Example:
 

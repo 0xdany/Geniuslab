@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 export function ApiKeyManager({
   keys,
@@ -47,12 +48,20 @@ export function ApiKeyManager({
                 <td className="px-4 py-3"><Badge>{key.status}</Badge></td>
                 <td className="px-4 py-3">{key.lastUsedAt ? key.lastUsedAt.toLocaleString() : "Never"}</td>
                 <td className="px-4 py-3 text-right">
-                  {key.status === "active" ? (
-                    <form action={revokeAction}>
-                      <input type="hidden" name="id" value={key.id} />
-                      <Button className="h-8 bg-white text-foreground ring-1 ring-border hover:bg-muted">Revoke</Button>
-                    </form>
-                  ) : null}
+                  <div className="flex justify-end gap-2">
+                    <Link
+                      href={`/admin/api-logs?apiKeyId=${key.id}`}
+                      className="inline-flex h-8 items-center rounded-md bg-white px-3 text-sm font-medium text-foreground ring-1 ring-border hover:bg-muted"
+                    >
+                      Logs
+                    </Link>
+                    {key.status === "active" ? (
+                      <form action={revokeAction}>
+                        <input type="hidden" name="id" value={key.id} />
+                        <Button className="h-8 bg-white text-foreground ring-1 ring-border hover:bg-muted">Revoke</Button>
+                      </form>
+                    ) : null}
+                  </div>
                 </td>
               </tr>
             ))}

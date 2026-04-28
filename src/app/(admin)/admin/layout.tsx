@@ -15,6 +15,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <nav className="flex items-center gap-4 text-sm">
             <Link href="/admin/assessments/new">New assessment</Link>
             <Link href="/admin/api-keys">API keys</Link>
+            <Link href="/admin/api-logs">API logs</Link>
             <Link href="/admin/settings">Settings</Link>
             <span className="text-muted-foreground">{admin.user.email}</span>
           </nav>

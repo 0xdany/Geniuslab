@@ -22,16 +22,18 @@ Question text is never sent with the landing page. The candidate clicks `Start Q
 
 MediaRecorder uses MIME fallback in this order:
 
+- `video/mp4;codecs=avc1.42E01E,mp4a.40.2`
+- `video/mp4;codecs=h264,aac`
+- `video/mp4`
 - `video/webm;codecs=vp9,opus`
 - `video/webm;codecs=vp8,opus`
 - `video/webm`
-- `video/mp4`
 
 Recording chunks are written to IndexedDB every 1-2 seconds. Chunks remain locally preserved until the server verifies the GCS object and finalizes the response.
 
 ## Storage And Playback
 
-Videos are uploaded directly from the browser to private GCS objects through resumable upload sessions. The Next.js server creates scoped upload sessions and finalizes metadata. Admin playback uses signed inline read URLs. Downloads use separate signed attachment URLs or a server-streamed zip.
+Videos are uploaded directly from the browser to private GCS objects through resumable upload sessions. The Next.js server creates scoped upload sessions and finalizes metadata. Admin playback uses short-lived signed inline read URLs. External API retrieval uses the configurable signed URL TTL, defaulting to 60 minutes. Downloads use separate signed attachment URLs or a server-streamed zip.
 
 Object naming:
 
@@ -61,7 +63,7 @@ Vercel hosts the app, while GCS is regional Standard storage with soft delete di
 
 ## Browser Compatibility
 
-Chrome and Firefox generally support WebM MediaRecorder. Safari support varies by version and may prefer MP4. The app detects supported MIME types and shows a blocking compatibility error if none are available.
+Safari and iOS playback are the reason MP4-compatible recording is preferred when supported. Chrome and Firefox may still record WebM depending on MediaRecorder support. The app keeps the original recorded file for download and shows an admin download fallback if inline playback fails.
 
 ## Tradeoffs
 

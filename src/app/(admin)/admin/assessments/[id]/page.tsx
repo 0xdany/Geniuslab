@@ -175,7 +175,7 @@ export default async function AssessmentReviewPage({ params }: { params: Promise
             </div>
             {row.playbackSigned ? (
               <>
-                <ReviewPlayer src={row.playbackSigned.url} />
+                <ReviewPlayer src={row.playbackSigned.url} downloadUrl={row.downloadSigned?.url} />
                 {row.downloadSigned ? (
                   <a className="mt-2 inline-flex text-sm font-medium text-primary" href={row.downloadSigned.url}>
                     Download individual video

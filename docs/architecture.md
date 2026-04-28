@@ -13,7 +13,7 @@ The platform stores each assessment per candidate. There are no reusable questio
 
 The landing page never includes question text. The candidate clicks `Start Question`, the server validates sequence and attempts, then returns exactly one question. The client immediately starts MediaRecorder and reveals the question in the same state transition.
 
-MediaRecorder uses MIME fallback and `start(1000)` to persist chunks to IndexedDB. Chunks stay local until the server verifies the uploaded GCS object and finalizes the response.
+MediaRecorder prefers MP4/H.264-compatible formats when the browser supports them, then falls back to WebM. Files are kept in the original browser-recorded format; no transcoding is required. Recording uses `start(1000)` to persist chunks to IndexedDB, and chunks stay local until the server verifies the uploaded GCS object and finalizes the response.
 
 ## Storage
 
@@ -23,7 +23,7 @@ Videos are private GCS objects:
 assessments/{assessmentId}/questions/{questionNumber}/attempts/{attemptId}/recording.{ext}
 ```
 
-Admin playback, downloads, and external retrieval use signed URLs or server-side zip streaming.
+Admin playback, downloads, and external retrieval use signed URLs or server-side zip streaming. Admin inline playback URLs are short-lived for page review, while external retrieval URLs use the configurable signed URL TTL. Signed URL values are never written to API request logs.
 
 ## Scaling Notes
 
@@ -31,7 +31,7 @@ Direct browser-to-GCS upload avoids routing large video bodies through Vercel se
 
 ## API And Auditability
 
-External API requests use bearer API keys. Keys are stored hashed with a visible prefix, can be revoked, and record usage. Intake supports `Idempotency-Key` so upstream systems can retry safely without creating duplicate assessments. API request logs record success and failure outcomes for auditing.
+External API requests use bearer API keys. Keys are stored hashed with a visible prefix, can be revoked, and record usage. Intake supports `Idempotency-Key` so upstream systems can retry safely without creating duplicate assessments. API request logs record success and failure outcomes for auditing and are visible in the admin dashboard.
 
 ## Email
 

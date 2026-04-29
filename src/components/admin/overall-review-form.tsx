@@ -3,21 +3,18 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 
-export function ReviewForm({
-  responseId,
-  score,
-  notes,
+export function OverallReviewForm({
+  initialScore,
+  initialNotes,
   action,
 }: {
-  responseId: string;
-  score?: number | null;
-  notes?: string | null;
+  initialScore?: string | null;
+  initialNotes?: string | null;
   action: (formData: FormData) => void | Promise<void>;
 }) {
-  const [currentScore, setCurrentScore] = useState<number>(score ? Math.round(score) : 3);
+  const [currentScore, setCurrentScore] = useState<number>(initialScore ? parseFloat(initialScore) : 3);
 
   // Map score to color and label for richer feedback
   const getScoreDetails = (val: number) => {
@@ -32,12 +29,11 @@ export function ReviewForm({
 
   return (
     <form action={action} className="mt-2 flex flex-col gap-6 w-full">
-      <input type="hidden" name="responseId" value={responseId} />
-      <input type="hidden" name="score" value={currentScore} />
+      <input type="hidden" name="overallScore" value={currentScore} />
       
       <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
         <div className="flex items-center justify-between mb-8">
-          <label className="font-semibold text-lg text-foreground">Rating Score</label>
+          <label className="font-semibold text-lg text-foreground">Final Rating Score</label>
           <motion.div 
             key={currentScore}
             initial={{ scale: 0.8, opacity: 0 }}
@@ -48,13 +44,13 @@ export function ReviewForm({
             <span className="text-xs uppercase tracking-wider font-semibold opacity-80 border-l border-current pl-2">{label}</span>
           </motion.div>
         </div>
-
+        
         <div className="px-2">
           <Slider
             min={1}
             max={5}
-            step={1}
-            thumbAriaLabel="Rating score"
+            step={0.5}
+            thumbAriaLabel="Final rating score"
             value={[currentScore]}
             onValueChange={(vals) => setCurrentScore(vals[0])}
             className="w-full py-4 cursor-grab active:cursor-grabbing"
@@ -72,18 +68,18 @@ export function ReviewForm({
       </div>
 
       <div className="space-y-3">
-        <label className="font-semibold text-foreground px-1">Reviewer Notes</label>
-        <Textarea 
-          name="notes" 
-          defaultValue={notes ?? ""} 
-          placeholder="Add detailed feedback on the candidate's performance here..." 
-          className="min-h-[140px] w-full text-base bg-background/50 focus-visible:ring-primary/40 rounded-xl" 
+        <label className="font-semibold text-foreground px-1">Summary Notes</label>
+        <textarea
+          name="summaryNotes"
+          defaultValue={initialNotes ?? ""}
+          placeholder="Add overall summary notes..."
+          className="flex min-h-[140px] w-full rounded-xl border border-input bg-background/50 px-4 py-3 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/40"
         />
       </div>
 
       <div className="flex justify-end pt-2">
         <Button type="submit" className="w-full sm:w-auto px-8 py-6 text-base font-semibold shadow-md rounded-xl hover:shadow-lg transition-all">
-          Save Review
+          Save Overall Summary
         </Button>
       </div>
     </form>

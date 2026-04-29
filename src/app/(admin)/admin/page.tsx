@@ -4,6 +4,7 @@ import { assessments, candidates } from "@/db/schema";
 import { AssessmentFilters } from "@/components/admin/assessment-filters";
 import { AssessmentTable } from "@/components/admin/assessment-table";
 import { expireStaleAssessments } from "@/lib/status";
+import { StaggerContainer, StaggerItem, FadeIn } from "@/components/ui/animation-wrapper";
 
 export const dynamic = "force-dynamic";
 
@@ -42,15 +43,23 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     .orderBy(sort);
 
   return (
-    <div>
-      <div className="mb-5 flex items-end justify-between">
+    <StaggerContainer className="relative">
+      <StaggerItem className="mb-5 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Assessments</h1>
-          <p className="text-sm text-muted-foreground">Review submissions, track status, and navigate candidate work.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Assessments</h1>
+          <p className="text-sm text-muted-foreground mt-1">Review submissions, track status, and navigate candidate work.</p>
         </div>
-      </div>
-      <AssessmentFilters defaults={params} />
-      <AssessmentTable rows={rows} />
-    </div>
+      </StaggerItem>
+      <StaggerItem>
+        <div className="glass-card rounded-xl p-2 mb-6 border border-primary/10">
+          <AssessmentFilters defaults={params} />
+        </div>
+      </StaggerItem>
+      <FadeIn delay={0.2}>
+        <div className="glass-card rounded-xl overflow-hidden border border-primary/10 shadow-lg">
+          <AssessmentTable rows={rows} />
+        </div>
+      </FadeIn>
+    </StaggerContainer>
   );
 }

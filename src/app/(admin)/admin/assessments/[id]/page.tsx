@@ -231,53 +231,54 @@ export default async function AssessmentReviewPage({ params }: { params: Promise
       {/* Videos List */}
       <StaggerItem>
         <h2 className="text-xl font-semibold mt-8 mb-5">Candidate Responses</h2>
-        <div className="space-y-10">
+        <div className="space-y-6">
           {signedRows.map((row) => (
-            <Card key={row.questionId} className="overflow-hidden border-border/40 shadow-sm transition-all hover:shadow-md">
+            <Card key={row.questionId} className="overflow-hidden border-border/40 shadow-sm">
               <div className="flex flex-col">
-                {/* Question Header */}
-                <div className="px-6 py-5 border-b border-border/40 bg-muted/20">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm border-border/50 text-xs font-semibold">
-                      Question {row.questionNumber}
-                    </Badge>
-                    {row.durationSeconds && (
-                      <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {row.durationSeconds}s
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="font-semibold text-xl text-foreground leading-relaxed">
-                    {row.questionText}
-                  </h3>
-                </div>
-
-                {/* Video Player Section */}
-                <div className="bg-black flex justify-center w-full relative">
-                  {row.playbackSigned ? (
-                    <div className="w-full max-w-5xl mx-auto">
-                      <ReviewPlayer src={row.playbackSigned.url} downloadUrl={row.downloadSigned?.url} />
-                    </div>
-                  ) : (
-                    <div className="py-32 flex flex-col items-center justify-center text-center w-full bg-slate-900/50">
-                      <div className="rounded-full bg-white/5 p-5 mb-5 ring-1 ring-white/10">
-                        <svg className="w-8 h-8 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
+                <div className="grid gap-6 border-b border-border/60 bg-white p-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(420px,1.1fr)]">
+                  <section className="flex flex-col justify-between rounded-lg border bg-muted/25 p-5">
+                    <div>
+                      <div className="mb-4 flex items-center gap-3">
+                        <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm border-border/50 text-xs font-semibold">
+                          Question {row.questionNumber}
+                        </Badge>
+                        {row.durationSeconds && (
+                          <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {row.durationSeconds}s
+                          </span>
+                        )}
                       </div>
-                      <p className="text-white/80 font-medium text-lg">Video still processing</p>
-                      <p className="text-sm text-white/50 mt-1">Please check back in a few minutes.</p>
+                      <p className="section-label">Prompt</p>
+                      <h3 className="mt-3 font-semibold text-2xl text-foreground leading-snug">
+                        {row.questionText}
+                      </h3>
                     </div>
-                  )}
+                  </section>
+
+                  <section className="overflow-hidden rounded-lg bg-black shadow-sm">
+                    {row.playbackSigned ? (
+                      <ReviewPlayer src={row.playbackSigned.url} downloadUrl={row.downloadSigned?.url} />
+                    ) : (
+                      <div className="flex min-h-[300px] flex-col items-center justify-center text-center bg-slate-900/50">
+                        <div className="rounded-full bg-white/5 p-5 mb-5 ring-1 ring-white/10">
+                          <svg className="w-8 h-8 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <p className="text-white/80 font-medium text-lg">Video still processing</p>
+                        <p className="text-sm text-white/50 mt-1">Please check back in a few minutes.</p>
+                      </div>
+                    )}
+                  </section>
                 </div>
 
                 {/* Review Form Section */}
-                <div className="px-6 py-6 bg-background">
+                <div className="bg-background px-5 py-5">
                   {row.responseId ? (
-                    <div className="max-w-4xl mx-auto">
+                    <div>
                       <ReviewForm responseId={row.responseId} score={row.reviewScore} notes={row.reviewNotes} action={saveReview} />
                     </div>
                   ) : (

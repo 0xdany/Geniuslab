@@ -12,7 +12,7 @@ type ButtonProps = HTMLMotionProps<"button"> & {
 
 const buttonVariants: Record<ButtonVariant, string> = {
   default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
-  outline: "border border-input bg-background text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground",
+  outline: "border border-input bg-background text-foreground shadow-sm hover:border-primary/30 hover:bg-primary/5 hover:text-primary",
   ghost: "bg-transparent text-foreground shadow-none hover:bg-accent hover:text-accent-foreground",
 };
 
@@ -21,10 +21,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <motion.button
         ref={ref}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className={cn(
-          "inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className={cn(
+          "inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50",
           buttonVariants[variant],
           className
         )}

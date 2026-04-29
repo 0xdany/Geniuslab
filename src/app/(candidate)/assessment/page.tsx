@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default function CandidateAssessmentPage() {
   return (
-    <main className="mx-auto min-h-screen max-w-4xl px-4 py-10">
+    <main className="min-h-screen bg-background px-4 py-8">
       <DeviceGate>
         <CandidateAssessmentShell />
       </DeviceGate>

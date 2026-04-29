@@ -13,6 +13,7 @@ import {
   savePendingRecording,
 } from "@/hooks/use-upload-queue";
 import { UploadRecoveryBanner } from "@/components/candidate/upload-recovery-banner";
+import { CheckCircle2, Clock3, Mic, Play, RotateCcw, Send, Square, Video } from "lucide-react";
 
 type Landing = {
   id: string;
@@ -282,30 +283,35 @@ export function QuestionRecorder({ landing, stream }: { landing: Landing; stream
     : 0;
 
   return (
-    <Card className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="text-xl font-semibold">{landing.title}</h2>
-          <p className="text-sm text-muted-foreground">
-            Question {Math.min(completed + 1, landing.questionCount)} of {landing.questionCount}
-          </p>
+    <Card className="console-shell mx-auto max-w-7xl">
+      <div className="border-b bg-white px-6 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0">
+            <p className="section-label">Video response</p>
+            <h2 className="mt-1 text-2xl font-bold tracking-tight">{landing.title}</h2>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="rounded-full border bg-muted/45 px-4 py-2 text-sm font-semibold">
+              Question {Math.min(completed + 1, landing.questionCount)} of {landing.questionCount}
+            </div>
+            {recorder.recording ? <span className="rounded-full bg-red-600 px-3 py-2 text-sm font-semibold text-white">REC</span> : null}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {recorder.recording ? <span className="rounded-full bg-red-600 px-3 py-1 text-sm font-semibold text-white">REC</span> : null}
-          {recorder.recording ? <span className="text-sm font-medium">{formatSeconds(elapsed)}</span> : null}
-          {remaining !== null ? <span className="text-sm text-muted-foreground">{formatSeconds(remaining)} left</span> : null}
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
+          <div className="h-full bg-primary transition-all" style={{ width: `${Math.min(100, (completed / landing.questionCount) * 100)}%` }} />
         </div>
       </div>
-      {status ? <div className="mt-4"><UploadRecoveryBanner message={status} /></div> : null}
-      {recorder.error ? <div className="mt-4"><UploadRecoveryBanner message={recorder.error} /></div> : null}
+      <div className="space-y-5 p-6">
+        {status ? <UploadRecoveryBanner message={status} /> : null}
+        {recorder.error ? <UploadRecoveryBanner message={recorder.error} /> : null}
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
-        <section className="min-h-48 rounded-lg border bg-muted p-5">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,1.1fr)]">
+        <section className="rounded-lg border bg-muted/35 p-6">
           {visibleQuestion ? (
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Question {visibleQuestion.questionNumber}</p>
-              <h3 className="mt-2 text-2xl font-semibold leading-snug">{visibleQuestion.text}</h3>
-              <p className="mt-3 text-sm text-muted-foreground">
+              <p className="section-label">Question {visibleQuestion.questionNumber}</p>
+              <h3 className="mt-4 text-3xl font-semibold leading-snug">{visibleQuestion.text}</h3>
+              <p className="mt-5 inline-flex rounded-full border bg-white px-3 py-1 text-sm font-semibold text-muted-foreground">
                 Attempt {visibleQuestion.attemptNumber} of {visibleQuestion.maxAttempts}
               </p>
               {stoppedAttempt && !stoppedAttempt.uploaded ? (
@@ -321,14 +327,16 @@ export function QuestionRecorder({ landing, stream }: { landing: Landing; stream
             </div>
           ) : done ? (
             <div>
-              <h3 className="text-2xl font-semibold">All responses are recorded</h3>
+              <CheckCircle2 className="h-10 w-10 text-emerald-600" />
+              <h3 className="mt-4 text-3xl font-semibold">All responses are recorded</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 Submit your assessment to lock your responses and send your confirmation.
               </p>
             </div>
           ) : (
             <div>
-              <h3 className="text-2xl font-semibold">Ready for question {completed + 1}</h3>
+              <Play className="h-10 w-10 text-primary" />
+              <h3 className="mt-4 text-3xl font-semibold">Ready for question {completed + 1}</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 The question appears at the same moment recording starts. Take a breath, then begin when ready.
               </p>
@@ -336,7 +344,7 @@ export function QuestionRecorder({ landing, stream }: { landing: Landing; stream
           )}
         </section>
 
-        <section className="rounded-lg border bg-white p-3">
+        <section className="rounded-lg border bg-white p-3 shadow-sm">
           <div className="relative overflow-hidden rounded-md">
             <video ref={videoRef} autoPlay muted playsInline className="aspect-video w-full object-cover" />
             {recorder.recording ? (
@@ -345,15 +353,26 @@ export function QuestionRecorder({ landing, stream }: { landing: Landing; stream
               </div>
             ) : null}
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Keep your face centered and speak naturally. Your camera and microphone stay active so there is no extra setup between questions.
-          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-md bg-muted/45 p-3">
+              <Video className="h-4 w-4 text-primary" />
+              <p className="mt-2 text-xs font-semibold text-muted-foreground">Camera active</p>
+            </div>
+            <div className="rounded-md bg-muted/45 p-3">
+              <Mic className="h-4 w-4 text-indigo-600" />
+              <p className="mt-2 text-xs font-semibold text-muted-foreground">Mic connected</p>
+            </div>
+            <div className="rounded-md bg-muted/45 p-3">
+              <Clock3 className="h-4 w-4 text-amber-600" />
+              <p className="mt-2 text-xs font-semibold text-muted-foreground">{recorder.recording ? formatSeconds(elapsed) : remaining !== null ? `${formatSeconds(remaining)} left` : "Ready"}</p>
+            </div>
+          </div>
         </section>
       </div>
 
-      <div className="flex flex-wrap justify-end gap-3">
-        {active ? <Button disabled={busy} onClick={() => void stop()}>Stop recording</Button> : null}
-        {!active && !stoppedAttempt && !done ? <Button disabled={busy} onClick={() => void startQuestion()}>Start question {completed + 1}</Button> : null}
+      <div className="flex flex-wrap justify-end gap-3 border-t pt-5">
+        {active ? <Button disabled={busy} onClick={() => void stop()}><Square className="mr-2 h-4 w-4" />Stop recording</Button> : null}
+        {!active && !stoppedAttempt && !done ? <Button disabled={busy} onClick={() => void startQuestion()}><Play className="mr-2 h-4 w-4" />Start question {completed + 1}</Button> : null}
         {stoppedAttempt && !stoppedAttempt.uploaded ? (
           <Button disabled={busy} onClick={() => void uploadAttempt(stoppedAttempt, stoppedAttempt.question.maxAttempts === 1 || stoppedAttempt.question.attemptNumber >= stoppedAttempt.question.maxAttempts)}>
             Retry upload
@@ -367,7 +386,7 @@ export function QuestionRecorder({ landing, stream }: { landing: Landing; stream
         {stoppedAttempt?.uploaded && attemptsRemaining > 0 ? (
           <Button
             disabled={busy}
-            className="bg-white text-foreground ring-1 ring-border hover:bg-muted"
+            variant="outline"
             onClick={() => {
               void clearRecordingChunks(stoppedAttempt.attemptId);
               void clearPendingRecording(stoppedAttempt.attemptId);
@@ -375,10 +394,12 @@ export function QuestionRecorder({ landing, stream }: { landing: Landing; stream
               void startQuestion();
             }}
           >
+            <RotateCcw className="mr-2 h-4 w-4" />
             Record another attempt
           </Button>
         ) : null}
-        {done ? <Button disabled={busy} onClick={() => void submitAssessment()}>Submit assessment</Button> : null}
+        {done ? <Button disabled={busy} onClick={() => void submitAssessment()}><Send className="mr-2 h-4 w-4" />Submit assessment</Button> : null}
+      </div>
       </div>
     </Card>
   );

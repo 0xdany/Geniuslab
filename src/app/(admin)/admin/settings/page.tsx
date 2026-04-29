@@ -9,6 +9,8 @@ import { FailedEmailTable } from "@/components/admin/failed-email-table";
 import { getAppSettings } from "@/lib/settings";
 import { requireAdmin } from "@/lib/admin-access";
 import { StaggerContainer, StaggerItem } from "@/components/ui/animation-wrapper";
+import { Badge } from "@/components/ui/badge";
+import { MailWarning, Settings2, UserPlus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -48,13 +50,19 @@ export default async function SettingsPage() {
     redirect("/admin/settings?invited=1");
   }
   return (
-    <StaggerContainer className="max-w-3xl space-y-6">
+    <StaggerContainer className="max-w-5xl space-y-6">
       <StaggerItem>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Settings</h1>
+        <Badge variant="default">Workspace controls</Badge>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground">Settings</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Tune candidate links, API guardrails, reviewer access, and operational email recovery.</p>
       </StaggerItem>
       
       <StaggerItem>
         <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg"><Settings2 className="h-5 w-5 text-primary" />Assessment and API defaults</CardTitle>
+            <CardDescription>Global behavior for new invitations and integration traffic.</CardDescription>
+          </CardHeader>
           <CardContent className="pt-6">
             <form action={save} className="grid gap-5 md:grid-cols-2">
               <label className="text-sm font-medium">Link expiration days<Input name="linkExpirationDays" type="number" defaultValue={settings.linkExpirationDays} className="mt-1" /></label>
@@ -70,7 +78,7 @@ export default async function SettingsPage() {
       <StaggerItem>
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Admin invites</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-lg"><UserPlus className="h-5 w-5 text-primary" />Admin invites</CardTitle>
             <CardDescription>
               Invited Google accounts receive admin access the first time they sign in.
             </CardDescription>
@@ -112,7 +120,7 @@ export default async function SettingsPage() {
       <StaggerItem>
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Failed emails</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-lg"><MailWarning className="h-5 w-5 text-primary" />Failed emails</CardTitle>
             <CardDescription>Retry invitation or completion emails after provider errors are fixed.</CardDescription>
           </CardHeader>
           <CardContent>

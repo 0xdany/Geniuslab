@@ -4,6 +4,8 @@ import { db } from "@/db/client";
 import { apiKeys, apiRequestLogs } from "@/db/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Activity } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -41,13 +43,14 @@ export default async function ApiLogsPage({ searchParams }: { searchParams: Prom
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-semibold">API request logs</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <Badge variant="default">Audit trail</Badge>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight">API request logs</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           Audit intake and video retrieval requests. Signed video URLs are never stored in these logs.
         </p>
       </div>
 
-      <form className="grid gap-3 rounded-lg border bg-white p-4 md:grid-cols-4 lg:grid-cols-8">
+      <form className="grid gap-3 rounded-lg border border-border/80 bg-white p-4 shadow-sm md:grid-cols-4 lg:grid-cols-8">
         <select name="apiKeyId" defaultValue={params.apiKeyId || ""} className="h-10 rounded-md border bg-white px-3 text-sm">
           <option value="">All API keys</option>
           {keys.map((key) => (
@@ -68,7 +71,11 @@ export default async function ApiLogsPage({ searchParams }: { searchParams: Prom
         <Button type="submit">Filter</Button>
       </form>
 
-      <div className="overflow-x-auto rounded-lg border bg-white">
+      <div className="console-shell overflow-x-auto">
+        <div className="flex items-center gap-2 border-b bg-muted/35 px-5 py-4">
+          <Activity className="h-4 w-4 text-primary" />
+          <h2 className="font-semibold">Latest requests</h2>
+        </div>
         <table className="w-full min-w-[900px] text-left text-sm">
           <thead className="bg-muted text-xs uppercase text-muted-foreground">
             <tr>

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Plus, Trash2, User, FileText, Video, Clock, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -134,7 +135,9 @@ export function ManualAssessmentForm({ action }: { action: (formData: FormData) 
       </div>
 
       <div className="pt-8 border-t border-border flex flex-col-reverse sm:flex-row items-center justify-end gap-4">
-        <Button variant="ghost" type="button" className="w-full sm:w-auto h-12 px-6 shadow-none">Cancel</Button>
+        <Link href="/admin" className="inline-flex h-12 w-full items-center justify-center rounded-md px-6 text-sm font-semibold transition-colors hover:bg-accent hover:text-accent-foreground sm:w-auto">
+          Cancel
+        </Link>
         <Button type="submit" className="w-full sm:w-auto h-12 px-8 text-base font-semibold shadow-lg hover:shadow-primary/25 transition-all">
           Create & Send Invitation
         </Button>

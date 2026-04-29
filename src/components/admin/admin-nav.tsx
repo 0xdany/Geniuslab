@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -17,7 +16,7 @@ export function AdminNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center gap-1 sm:gap-2">
+    <nav className="flex max-w-[62vw] items-center gap-1 overflow-x-auto">
       {links.map((link) => {
         const isActive =
           pathname === link.href || (link.href !== "/admin" && pathname?.startsWith(link.href));
@@ -27,17 +26,10 @@ export function AdminNav() {
             key={link.name}
             href={link.href}
             className={cn(
-              "relative px-3 py-1.5 text-sm font-medium transition-colors rounded-md",
-              isActive ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              "relative rounded-md px-3 py-2 text-sm font-semibold transition-colors",
+              isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
-            {isActive && (
-              <motion.div
-                layoutId="active-nav"
-                className="absolute inset-0 bg-primary/10 rounded-md -z-10"
-                transition={{ type: "spring", stiffness: 380, damping: 30 }}
-              />
-            )}
             {link.name}
           </Link>
         );

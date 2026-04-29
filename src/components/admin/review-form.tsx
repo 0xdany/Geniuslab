@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Slider } from "@/components/ui/slider";
+import { RatingRubric } from "@/components/admin/rating-rubric";
 
 export function ReviewForm({
   responseId,
@@ -19,70 +18,22 @@ export function ReviewForm({
 }) {
   const [currentScore, setCurrentScore] = useState<number>(score ? Math.round(score) : 3);
 
-  // Map score to color and label for richer feedback
-  const getScoreDetails = (val: number) => {
-    if (val === 1) return { color: "text-destructive border-destructive/20 bg-destructive/10", label: "Poor" };
-    if (val === 2) return { color: "text-orange-500 border-orange-500/20 bg-orange-500/10", label: "Fair" };
-    if (val === 3) return { color: "text-yellow-600 border-yellow-600/20 bg-yellow-600/10", label: "Good" };
-    if (val === 4) return { color: "text-blue-500 border-blue-500/20 bg-blue-500/10", label: "Very Good" };
-    return { color: "text-green-600 border-green-600/20 bg-green-600/10", label: "Excellent" };
-  };
-
-  const { color, label } = getScoreDetails(currentScore);
-
   return (
-    <form action={action} className="mt-2 flex flex-col gap-6 w-full">
+    <form action={action} className="flex w-full flex-col gap-4">
       <input type="hidden" name="responseId" value={responseId} />
-      <input type="hidden" name="score" value={currentScore} />
-      
-      <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
-        <div className="flex items-center justify-between mb-8">
-          <label className="font-semibold text-lg text-foreground">Rating Score</label>
-          <motion.div 
-            key={currentScore}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className={`px-4 py-1.5 rounded-full font-bold text-lg border flex items-center gap-2 ${color}`}
-          >
-            <span>{currentScore}</span>
-            <span className="text-xs uppercase tracking-wider font-semibold opacity-80 border-l border-current pl-2">{label}</span>
-          </motion.div>
-        </div>
+      <RatingRubric name="score" value={currentScore} onChange={setCurrentScore} title="Question rating" />
 
-        <div className="px-2">
-          <Slider
-            min={1}
-            max={5}
-            step={1}
-            thumbAriaLabel="Rating score"
-            value={[currentScore]}
-            onValueChange={(vals) => setCurrentScore(vals[0])}
-            className="w-full py-4 cursor-grab active:cursor-grabbing"
-          />
-          
-          <div className="flex justify-between text-xs text-muted-foreground mt-4 font-medium px-1">
-            {[1, 2, 3, 4, 5].map((val) => (
-              <span key={val} className={`flex flex-col items-center gap-1.5 ${currentScore === val ? 'text-foreground font-bold' : ''}`}>
-                <span className={`w-1 h-2 rounded-full ${currentScore === val ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
-                {val}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <label className="font-semibold text-foreground px-1">Reviewer Notes</label>
+      <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div className="space-y-2">
+        <label className="px-1 font-semibold text-foreground">Reviewer Notes</label>
         <Textarea 
           name="notes" 
           defaultValue={notes ?? ""} 
           placeholder="Add detailed feedback on the candidate's performance here..." 
-          className="min-h-[140px] w-full text-base bg-background/50 focus-visible:ring-primary/40 rounded-xl" 
+          className="min-h-[96px] w-full rounded-lg bg-background/50 text-base focus-visible:ring-primary/40" 
         />
-      </div>
-
-      <div className="flex justify-end pt-2">
-        <Button type="submit" className="w-full sm:w-auto px-8 py-6 text-base font-semibold shadow-md rounded-xl hover:shadow-lg transition-all">
+        </div>
+        <Button type="submit" className="h-12 w-full px-8 text-base font-semibold shadow-md sm:w-auto lg:mb-0.5">
           Save Review
         </Button>
       </div>

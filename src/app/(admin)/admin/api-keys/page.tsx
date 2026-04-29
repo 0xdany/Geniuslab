@@ -5,6 +5,7 @@ import { apiKeyUsage, apiKeys } from "@/db/schema";
 import { ApiKeyManager } from "@/components/admin/api-key-manager";
 import { createApiKey } from "@/lib/api-keys";
 import { requireAdmin } from "@/lib/admin-access";
+import { Badge } from "@/components/ui/badge";
 
 export const dynamic = "force-dynamic";
 
@@ -28,9 +29,12 @@ export default async function ApiKeysPage({ searchParams }: { searchParams: Prom
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold">API keys</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Generate, revoke, and audit external integration keys.</p>
+    <div className="space-y-6">
+      <div>
+        <Badge variant="default">Integrations</Badge>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight">API keys</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Generate, revoke, and audit external systems that trigger assessments or retrieve completed videos.</p>
+      </div>
       <div className="mt-6">
         <ApiKeyManager keys={keys} usage={usage} createdKey={params.created} createAction={createAction} revokeAction={revokeAction} />
       </div>

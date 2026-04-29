@@ -30,6 +30,7 @@ npm run dev
 Open `http://localhost:3000`.
 
 Required env vars are documented below and in `.env.example`. The first admin is bootstrapped from `INITIAL_ADMIN_EMAIL` when that Google account signs in.
+See [`docs/admin-access.md`](docs/admin-access.md) for adding more admin emails after bootstrap.
 
 ## Environment Variables
 
@@ -114,6 +115,10 @@ See [`docs/gcp-storage.md`](docs/gcp-storage.md) for storage-only GCP setup.
 ## API Docs
 
 See [`docs/api.md`](docs/api.md).
+
+## Admin Access
+
+See [`docs/admin-access.md`](docs/admin-access.md) for first-admin setup and inviting additional admin emails.
 
 ## Demo
 

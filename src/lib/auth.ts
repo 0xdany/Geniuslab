@@ -28,7 +28,7 @@ const trustedOrigins = Array.from(
 ) as string[];
 
 export const auth = betterAuth({
-  appName: "Geniuslab Video Assessment",
+  appName: "Hireboard Video Assessment",
   baseURL: authBaseURL,
   secret: process.env.BETTER_AUTH_SECRET || "development-only-secret-change-me",
   trustedOrigins,

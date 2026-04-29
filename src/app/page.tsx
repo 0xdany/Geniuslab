@@ -10,7 +10,7 @@ export default function Home() {
       <AnimatedBackground />
       <header className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2 text-2xl font-bold tracking-tight">
-          Geniuslab<span className="text-primary">✦</span>
+          Hireboard<span className="text-primary">✦</span>
         </Link>
         <div className="flex items-center gap-3">
           <SignInButton />

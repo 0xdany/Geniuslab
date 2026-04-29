@@ -21,4 +21,4 @@ function withProtocol(value: string) {
 
 export const gcpProjectId = () => process.env.GCP_PROJECT_ID || "geniuslab-494619";
 export const gcsBucketName = () => process.env.GCS_BUCKET || "geniuslab-494619-geniuslab-videos";
-export const emailFrom = () => process.env.EMAIL_FROM || "Geniuslab <assessments@reachout.danyraihan.dev>";
+export const emailFrom = () => process.env.EMAIL_FROM || "Hireboard <assessments@reachout.danyraihan.dev>";

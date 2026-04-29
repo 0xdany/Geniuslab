@@ -13,7 +13,7 @@ import {
 } from "@/db/schema";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { BulkDownloadButton } from "@/components/admin/bulk-download-button";
 import { ReviewForm } from "@/components/admin/review-form";
 import { OverallReviewForm } from "@/components/admin/overall-review-form";
@@ -195,38 +195,46 @@ export default async function AssessmentReviewPage({ params }: { params: Promise
         </div>
       </StaggerItem>
 
-      {/* Overall Assessment Details */}
-      <div className="grid md:grid-cols-3 gap-6">
-        <StaggerItem className="md:col-span-1">
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle className="text-lg">Assessment Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <h3 className="font-medium">{assessment.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                {assessment.description || "No description provided."}
+      <StaggerItem>
+        <Card>
+          <CardHeader className="border-b bg-white">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0">
+                <CardTitle className="text-xl">Overall Review</CardTitle>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  Final score and closing thoughts for this assessment.
+                </p>
+              </div>
+              <div className="grid gap-2 text-sm sm:grid-cols-3 lg:min-w-[560px]">
+                <div className="rounded-lg border bg-muted/25 px-3 py-2">
+                  <p className="section-label">Assessment</p>
+                  <p className="mt-1 truncate font-semibold">{assessment.title}</p>
+                </div>
+                <div className="rounded-lg border bg-muted/25 px-3 py-2">
+                  <p className="section-label">Source</p>
+                  <p className="mt-1 font-semibold capitalize">{assessment.sourceType}</p>
+                </div>
+                <div className="rounded-lg border bg-muted/25 px-3 py-2">
+                  <p className="section-label">Created</p>
+                  <p className="mt-1 font-semibold">{assessment.createdAt.toLocaleDateString()}</p>
+                </div>
+              </div>
+            </div>
+            {assessment.description ? (
+              <p className="mt-4 rounded-lg border bg-muted/20 px-4 py-3 text-sm leading-6 text-muted-foreground">
+                {assessment.description}
               </p>
-            </CardContent>
-          </Card>
-        </StaggerItem>
-
-        <StaggerItem className="md:col-span-2">
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle className="text-lg">Overall Review</CardTitle>
-              <CardDescription>Final score and closing thoughts on this candidate.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <OverallReviewForm 
-                initialScore={assessment.overallScore}
-                initialNotes={assessment.summaryNotes}
-                action={saveOverallReview}
-              />
-            </CardContent>
-          </Card>
-        </StaggerItem>
-      </div>
+            ) : null}
+          </CardHeader>
+          <CardContent className="p-5">
+            <OverallReviewForm
+              initialScore={assessment.overallScore}
+              initialNotes={assessment.summaryNotes}
+              action={saveOverallReview}
+            />
+          </CardContent>
+        </Card>
+      </StaggerItem>
 
       {/* Videos List */}
       <StaggerItem>

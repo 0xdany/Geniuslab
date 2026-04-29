@@ -49,7 +49,7 @@ export function CandidateAssessmentShell() {
     return (
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
-          <div className="text-2xl font-bold tracking-tight">Geniuslab<span className="text-primary">✦</span></div>
+          <div className="text-2xl font-bold tracking-tight">Hireboard<span className="text-primary">✦</span></div>
           <div className="hidden text-sm font-semibold text-muted-foreground sm:block">Secure video assessment</div>
         </div>
         <Card className="console-shell grid overflow-hidden lg:grid-cols-[0.8fr_1.2fr]">

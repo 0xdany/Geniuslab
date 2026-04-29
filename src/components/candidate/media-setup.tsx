@@ -16,7 +16,7 @@ export function MediaSetup({ onReady }: { onReady: (stream: MediaStream) => void
   return (
     <div className="mx-auto max-w-6xl">
       <div className="mb-6 flex items-center justify-between">
-        <div className="text-2xl font-bold tracking-tight">Geniuslab<span className="text-primary">✦</span></div>
+        <div className="text-2xl font-bold tracking-tight">Hireboard<span className="text-primary">✦</span></div>
         <div className="section-label hidden sm:block">Device check</div>
       </div>
       <Card className="console-shell grid overflow-hidden lg:grid-cols-[1.1fr_0.9fr]">

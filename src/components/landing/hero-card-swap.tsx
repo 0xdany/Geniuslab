@@ -11,7 +11,7 @@ export function HeroCardSwap() {
       <CardSwap width={520} height={390} cardDistance={52} verticalDistance={62} delay={4200} pauseOnHover skewAmount={4} easing="elastic">
         <Card className="overflow-hidden">
           <div className="flex h-12 items-center justify-between border-b bg-white px-5">
-            <div className="text-lg font-bold">Geniuslab<span className="text-primary">✦</span></div>
+            <div className="text-lg font-bold">Hireboard<span className="text-primary">✦</span></div>
             <span className="section-label">Candidate review</span>
           </div>
           <div className="grid h-[calc(100%-3rem)] grid-cols-[150px_1fr]">

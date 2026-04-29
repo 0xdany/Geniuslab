@@ -10,6 +10,7 @@ import {
   clearRecordingChunks,
   listPendingRecordings,
   loadRecordingChunks,
+  prepareRecordingStorage,
   savePendingRecording,
 } from "@/hooks/use-upload-queue";
 import { UploadRecoveryBanner } from "@/components/candidate/upload-recovery-banner";
@@ -238,6 +239,7 @@ export function QuestionRecorder({ landing, stream }: { landing: Landing; stream
     setBusy(true);
     setStatus(null);
     try {
+      await prepareRecordingStorage();
       const response = await fetch("/api/candidate/questions/start", {
         method: "POST",
         headers: { "content-type": "application/json" },

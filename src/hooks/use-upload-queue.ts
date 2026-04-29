@@ -1,9 +1,12 @@
 "use client";
 
-import { openDB } from "idb";
+import { deleteDB, openDB } from "idb";
 import type { IDBPDatabase } from "idb";
 
 let dbPromise: Promise<IDBPDatabase> | null = null;
+const recordingDbName = "geniuslab-recordings";
+const recordingDbVersion = 2;
+const requiredStores = ["chunks", "pending"] as const;
 
 export type PendingRecording = {
   id: string;
@@ -21,11 +24,15 @@ export type PendingRecording = {
   updatedAt: number;
 };
 
+function hasRequiredStores(db: IDBPDatabase) {
+  return requiredStores.every((store) => db.objectStoreNames.contains(store));
+}
+
 function getRecordingDb() {
   if (typeof indexedDB === "undefined") {
     throw new Error("IndexedDB is not available in this browser context.");
   }
-  dbPromise ??= openDB("geniuslab-recordings", 1, {
+  dbPromise ??= openDB(recordingDbName, recordingDbVersion, {
     upgrade(db) {
       if (!db.objectStoreNames.contains("chunks")) {
         db.createObjectStore("chunks", { keyPath: "id" });
@@ -34,8 +41,30 @@ function getRecordingDb() {
         db.createObjectStore("pending", { keyPath: "id" });
       }
     },
+  }).then(async (db) => {
+    if (hasRequiredStores(db)) return db;
+
+    db.close();
+    await deleteDB(recordingDbName);
+    const repaired = await openDB(recordingDbName, recordingDbVersion, {
+      upgrade(repairDb) {
+        for (const store of requiredStores) {
+          if (!repairDb.objectStoreNames.contains(store)) {
+            repairDb.createObjectStore(store, { keyPath: "id" });
+          }
+        }
+      },
+    });
+    if (!hasRequiredStores(repaired)) {
+      throw new Error("Recording storage could not be prepared in this browser.");
+    }
+    return repaired;
   });
   return dbPromise;
+}
+
+export async function prepareRecordingStorage() {
+  await getRecordingDb();
 }
 
 export async function saveRecordingChunk(attemptId: string, index: number, chunk: Blob) {
@@ -91,6 +120,7 @@ export function useUploadQueue() {
     saveRecordingChunk,
     loadRecordingChunks,
     clearRecordingChunks,
+    prepareRecordingStorage,
     savePendingRecording,
     listPendingRecordings,
     getPendingRecording,

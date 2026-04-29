@@ -3,10 +3,15 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { SignInButton } from "@/components/admin/sign-in-button";
 import { AnimatedBackground } from "@/components/ui/animated-background";
 import { HeroCardSwap } from "@/components/landing/hero-card-swap";
+import { AuthRequiredModal } from "@/components/landing/auth-required-modal";
 
-export default function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+  const params = await searchParams;
+  const showAuthRequired = params.admin === "required";
+
   return (
     <main className="relative min-h-screen overflow-hidden">
+      {showAuthRequired ? <AuthRequiredModal /> : null}
       <AnimatedBackground />
       <header className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2 text-2xl font-bold tracking-tight">

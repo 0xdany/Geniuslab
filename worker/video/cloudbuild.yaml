@@ -1,0 +1,15 @@
+substitutions:
+  _IMAGE: us-west1-docker.pkg.dev/geniuslab-494619/geniuslab/geniuslab-video-worker
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - worker/video/Dockerfile
+      - -t
+      - ${_IMAGE}
+      - .
+
+images:
+  - ${_IMAGE}

@@ -20,6 +20,9 @@ Use this checklist before recording the final demo.
 - Manual creation starts with four question slots and can add/remove questions while keeping at least one.
 - Assessment list filters by status/title/source/date and shows source/status/score.
 - Completed assessments show inline video preview, playback speed controls, score, notes, individual download, and bulk zip download.
+- On a completed assessment, click **Process videos** and confirm the integration status moves to queued/processing, then ready after the Cloud Run worker finishes.
+- When processing is ready, reload the review page and confirm playback uses the processed MP4 with a thumbnail poster while the download link still downloads the original recording.
+- Click **Export to Drive** and confirm the configured Google Drive folder receives one assessment folder with MP4 files, thumbnails, and `metadata.json`.
 - Marking an assessment reviewed changes status from `completed` to `reviewed`.
 - Failed email rows can be retried from the admin API/action.
 

@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { Download } from "lucide-react";
 
-export function ReviewPlayer({ src, downloadUrl }: { src: string; downloadUrl?: string }) {
+export function ReviewPlayer({ src, downloadUrl, poster }: { src: string; downloadUrl?: string; poster?: string }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [speed, setSpeed] = useState("1");
   const [error, setError] = useState<string | null>(null);
@@ -14,6 +14,7 @@ export function ReviewPlayer({ src, downloadUrl }: { src: string; downloadUrl?: 
         <video
           ref={ref}
           src={src}
+          poster={poster}
           controls
           playsInline
           preload="metadata"

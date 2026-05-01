@@ -10,6 +10,7 @@ import {
   questionResponses,
   responseReviews,
   videoObjects,
+  processedVideoAssets,
 } from "@/db/schema";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,9 +19,12 @@ import { BulkDownloadButton } from "@/components/admin/bulk-download-button";
 import { ReviewForm } from "@/components/admin/review-form";
 import { OverallReviewForm } from "@/components/admin/overall-review-form";
 import { ReviewPlayer } from "@/components/admin/review-player";
+import { IntegrationActions } from "@/components/admin/integration-actions";
 import { requireAdmin } from "@/lib/admin-access";
 import { videoDownloadName } from "@/lib/downloads";
 import { getSignedReadUrl } from "@/lib/storage/gcs";
+import { getProcessingSummary } from "@/lib/integrations/processing";
+import { getLatestDriveExportJob } from "@/lib/integrations/drive";
 import { StaggerContainer, StaggerItem } from "@/components/ui/animation-wrapper";
 import { ChevronLeft, ChevronRight, CheckCircle2, User } from "lucide-react";
 
@@ -42,28 +46,46 @@ export default async function AssessmentReviewPage({ params }: { params: Promise
       durationSeconds: videoObjects.durationSeconds,
       objectName: videoObjects.gcsObjectName,
       ext: videoObjects.fileExtension,
+      processedStatus: processedVideoAssets.status,
+      processedMp4ObjectName: processedVideoAssets.mp4ObjectName,
+      processedThumbnailObjectName: processedVideoAssets.thumbnailObjectName,
+      processedDurationSeconds: processedVideoAssets.durationSeconds,
       reviewScore: responseReviews.score,
       reviewNotes: responseReviews.notes,
     })
     .from(assessmentQuestions)
     .leftJoin(questionResponses, eq(questionResponses.questionId, assessmentQuestions.id))
     .leftJoin(videoObjects, eq(videoObjects.attemptId, questionResponses.finalizedAttemptId))
+    .leftJoin(processedVideoAssets, eq(processedVideoAssets.videoObjectId, videoObjects.id))
     .leftJoin(responseReviews, eq(responseReviews.responseId, questionResponses.id))
     .where(eq(assessmentQuestions.assessmentId, id))
     .orderBy(asc(assessmentQuestions.questionNumber));
 
   const signedRows = await Promise.all(
     rows.map(async (row) => {
-      if (!row.objectName) return { ...row, playbackSigned: null, downloadSigned: null };
-      const playbackSigned = await getSignedReadUrl(row.objectName, 15 * 60);
+      if (!row.objectName) return { ...row, playbackSigned: null, downloadSigned: null, posterSigned: null };
+      const playbackObjectName = row.processedStatus === "ready" && row.processedMp4ObjectName ? row.processedMp4ObjectName : row.objectName;
+      const playbackSigned = await getSignedReadUrl(playbackObjectName, 15 * 60);
       const downloadSigned = await getSignedReadUrl(
         row.objectName,
         15 * 60,
         `attachment; filename="${videoDownloadName(candidate.name, assessment.title, row.questionNumber, row.ext || "webm")}"`,
       );
-      return { ...row, playbackSigned, downloadSigned };
+      const posterSigned = row.processedStatus === "ready" && row.processedThumbnailObjectName
+        ? await getSignedReadUrl(row.processedThumbnailObjectName, 15 * 60)
+        : null;
+      return { ...row, playbackSigned, downloadSigned, posterSigned };
     }),
   );
+  const processingSummary = await getProcessingSummary(id);
+  const driveExport = await getLatestDriveExportJob(id);
+  const driveExportView = driveExport
+    ? {
+      status: driveExport.status,
+      driveFolderUrl: driveExport.driveFolderUrl,
+      errorMessage: driveExport.errorMessage,
+    }
+    : null;
   const reviewQueue = await db
     .select({ id: assessments.id, candidateName: candidates.name })
     .from(assessments)
@@ -196,6 +218,10 @@ export default async function AssessmentReviewPage({ params }: { params: Promise
       </StaggerItem>
 
       <StaggerItem>
+        <IntegrationActions assessmentId={assessment.id} processing={processingSummary} driveExport={driveExportView} />
+      </StaggerItem>
+
+      <StaggerItem>
         <Card>
           <CardHeader className="border-b bg-white">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -255,7 +281,7 @@ export default async function AssessmentReviewPage({ params }: { params: Promise
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            {row.durationSeconds}s
+                            {row.processedDurationSeconds || row.durationSeconds}s
                           </span>
                         )}
                       </div>
@@ -268,7 +294,11 @@ export default async function AssessmentReviewPage({ params }: { params: Promise
 
                   <section className="overflow-hidden rounded-lg bg-black shadow-sm">
                     {row.playbackSigned ? (
-                      <ReviewPlayer src={row.playbackSigned.url} downloadUrl={row.downloadSigned?.url} />
+                      <ReviewPlayer
+                        src={row.playbackSigned.url}
+                        downloadUrl={row.downloadSigned?.url}
+                        poster={row.posterSigned?.url}
+                      />
                     ) : (
                       <div className="flex min-h-[300px] flex-col items-center justify-center text-center bg-slate-900/50">
                         <div className="rounded-full bg-white/5 p-5 mb-5 ring-1 ring-white/10">

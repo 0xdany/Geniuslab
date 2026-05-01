@@ -25,9 +25,20 @@ assessments/{assessmentId}/questions/{questionNumber}/attempts/{attemptId}/recor
 
 Admin playback, downloads, and external retrieval use signed URLs or server-side zip streaming. Admin inline playback URLs are short-lived for page review, while external retrieval URLs use the configurable signed URL TTL. Signed URL values are never written to API request logs.
 
+## Optional Processing And Drive Export
+
+Completed assessments can be processed manually from the admin review page. The Next.js app creates idempotent processing job rows, then invokes a Cloud Run Job. The worker downloads each original GCS recording, runs FFmpeg, and writes additive derivatives back to GCS:
+
+```text
+processed/{assessmentId}/{videoObjectId}/playback.mp4
+processed/{assessmentId}/{videoObjectId}/thumbnail.jpg
+```
+
+The review page prefers processed MP4 playback and thumbnail posters when they are ready, while original recordings remain the download/audit source. Google Drive export is also manual. It requires processed assets, creates one folder under the configured Drive parent folder, uploads MP4s and thumbnails, and writes a `metadata.json` file describing the assessment and question mapping.
+
 ## Scaling Notes
 
-Direct browser-to-GCS upload avoids routing large video bodies through Vercel serverless functions. The app handles metadata, auth, signed URLs, and finalization checks. Neon stores relational state. For higher concurrency, add background processing for transcoding, queue email retries, and introduce lifecycle policies for old video retention.
+Direct browser-to-GCS upload avoids routing large video bodies through Vercel serverless functions. The app handles metadata, auth, signed URLs, and finalization checks. Neon stores relational state. CPU-heavy transcoding and Drive uploads run in Cloud Run Jobs instead of Vercel request handlers. For higher concurrency, queue email retries and introduce lifecycle policies for old video retention.
 
 ## API And Auditability
 

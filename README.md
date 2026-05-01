@@ -4,7 +4,7 @@ Full-stack video assessment platform for API-triggered and manually created cand
 
 Deployment target: Vercel for the Next.js app, with Google Cloud Storage retained for private video storage.
 
-Deployment URL: add the active Vercel production URL here before submission.
+Deployment URL: https://geniuslab-dany.vercel.app/
 
 ## Stack
 
@@ -43,9 +43,16 @@ See [`docs/admin-access.md`](docs/admin-access.md) for adding more admin emails 
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID. |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret. |
 | `GCP_PROJECT_ID` | GCP project id, currently `geniuslab-494619`. |
+| `GCP_LOCATION` | GCP region for the video worker Cloud Run Job. Defaults to `us-west1`. |
 | `GCS_BUCKET` | Private video bucket, currently `geniuslab-494619-geniuslab-videos`. |
 | `GOOGLE_SIGNING_SERVICE_ACCOUNT` | Service account used for signed GCS URLs. |
 | `GCP_SERVICE_ACCOUNT_JSON` | Full or base64-encoded service account JSON for Vercel to access/sign GCS URLs. |
+| `VIDEO_WORKER_JOB_NAME` | Cloud Run Job name used for FFmpeg processing and Drive export. Defaults to `geniuslab-video-worker`. |
+| `PROCESSED_VIDEO_PREFIX` | GCS prefix for processed MP4 and thumbnail derivatives. Defaults to `processed`. |
+| `GOOGLE_DRIVE_EXPORT_FOLDER_ID` | Google Drive folder ID where completed assessment export folders are created. Share this folder with the service account as Editor. |
+| `GOOGLE_DRIVE_CLIENT_ID` | Optional OAuth client ID for exporting into a normal My Drive folder. Falls back to `GOOGLE_CLIENT_ID`. |
+| `GOOGLE_DRIVE_CLIENT_SECRET` | Optional OAuth client secret for exporting into a normal My Drive folder. Falls back to `GOOGLE_CLIENT_SECRET`. |
+| `GOOGLE_DRIVE_REFRESH_TOKEN` | Optional OAuth refresh token for Drive uploads owned by a real Google user. Required for normal My Drive folders because service accounts have no Drive storage quota. |
 | `RESEND_API_KEY` | Resend API key. |
 | `EMAIL_FROM` | Verified Resend sender, e.g. `Geniuslab <assessments@reachout.danyraihan.dev>`. |
 | `CRON_SECRET` | Bearer token for `/api/cron/expire-assessments`. |
@@ -54,7 +61,7 @@ Google OAuth redirect URIs:
 
 ```text
 http://localhost:3000/api/auth/callback/google
-https://YOUR-VERCEL-DOMAIN.vercel.app/api/auth/callback/google
+https://geniuslab-dany.vercel.app/api/auth/callback/google
 ```
 
 Add a Codespaces callback URL too if using Codespaces:
@@ -108,9 +115,44 @@ Set all variables from `.env.example` in Vercel Project Settings. On Vercel:
 - Add the Vercel OAuth callback URL in Google Cloud Console.
 - Add the Vercel origin to `gcs-cors.json`, then apply it to the bucket.
 - Set `GCP_SERVICE_ACCOUNT_JSON` to a service account JSON with access to the video bucket.
+- Set the video worker and Drive export variables if using optional integrations.
 - If Vercel env vars are changed after a deployment, trigger a fresh production redeploy.
 
 See [`docs/gcp-storage.md`](docs/gcp-storage.md) for storage-only GCP setup.
+
+### Optional Video Worker And Drive Export
+
+The optional processing/export flow keeps heavy work out of Vercel. The admin app creates DB job rows and invokes a Cloud Run Job; the worker runs FFmpeg, writes processed GCS assets, and can export processed videos to Google Drive.
+
+Enable the Drive API:
+
+```bash
+gcloud services enable drive.googleapis.com --project=geniuslab-494619
+```
+
+For a Workspace Shared Drive, create or choose a folder, copy its folder ID from the URL, and share it with the service account email from `GOOGLE_SIGNING_SERVICE_ACCOUNT` as Editor. Set that ID as `GOOGLE_DRIVE_EXPORT_FOLDER_ID`.
+
+For a normal My Drive folder, use Google OAuth instead. Set `GOOGLE_DRIVE_REFRESH_TOKEN` plus `GOOGLE_DRIVE_CLIENT_ID` and `GOOGLE_DRIVE_CLIENT_SECRET` so the worker uploads as that Google user; service accounts cannot own files in My Drive because they have no Drive storage quota.
+
+Build and deploy the worker image:
+
+```bash
+gcloud builds submit \
+  --config worker/video/cloudbuild.yaml \
+  --substitutions _IMAGE=us-west1-docker.pkg.dev/geniuslab-494619/geniuslab/geniuslab-video-worker \
+  --project=geniuslab-494619
+
+gcloud run jobs create geniuslab-video-worker \
+  --image us-west1-docker.pkg.dev/geniuslab-494619/geniuslab/geniuslab-video-worker \
+  --region us-west1 \
+  --project=geniuslab-494619 \
+  --set-env-vars GCP_PROJECT_ID=geniuslab-494619,GCP_LOCATION=us-west1,GCS_BUCKET=geniuslab-494619-geniuslab-videos,PROCESSED_VIDEO_PREFIX=processed,GOOGLE_DRIVE_EXPORT_FOLDER_ID=YOUR_DRIVE_FOLDER_ID \
+  --set-secrets DATABASE_URL=DATABASE_URL:latest,GCP_SERVICE_ACCOUNT_JSON=GCP_SERVICE_ACCOUNT_JSON:latest
+```
+
+If you are not using Secret Manager, set `DATABASE_URL` and `GCP_SERVICE_ACCOUNT_JSON` using your deployment mechanism for Cloud Run Jobs. Grant the Vercel/app service account permission to run the Cloud Run Job, and grant the worker service account access to the video bucket and target Drive folder.
+
+YouTube upload is intentionally deferred. The processed MP4 assets created here are the right source for a future YouTube export if that becomes worth the OAuth, quota, and policy overhead.
 
 ## API Docs
 

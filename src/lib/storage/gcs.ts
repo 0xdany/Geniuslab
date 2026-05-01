@@ -1,5 +1,7 @@
 import { Storage } from "@google-cloud/storage";
 import { GoogleAuth } from "google-auth-library";
+import { mkdir } from "node:fs/promises";
+import { dirname } from "node:path";
 import { appUrl, gcpProjectId, gcsBucketName } from "@/lib/env";
 
 let storage: Storage | null = null;
@@ -62,6 +64,33 @@ export async function verifyGcsObject(objectName: string) {
     contentType: metadata.contentType || "application/octet-stream",
     generation: metadata.generation,
   };
+}
+
+export async function downloadGcsObjectToFile(objectName: string, destinationPath: string) {
+  await mkdir(dirname(destinationPath), { recursive: true });
+  await getVideoBucket().file(objectName).download({ destination: destinationPath });
+}
+
+export async function uploadFileToGcs(sourcePath: string, objectName: string, contentType: string, metadata?: Record<string, string>) {
+  const [file] = await getVideoBucket().upload(sourcePath, {
+    destination: objectName,
+    metadata: {
+      contentType,
+      metadata,
+    },
+    resumable: true,
+  });
+  const [fileMetadata] = await file.getMetadata();
+  return {
+    objectName,
+    sizeBytes: Number(fileMetadata.size ?? 0),
+    contentType: fileMetadata.contentType || contentType,
+  };
+}
+
+export async function downloadGcsObjectToBuffer(objectName: string) {
+  const [buffer] = await getVideoBucket().file(objectName).download();
+  return buffer;
 }
 
 async function getIamSignedReadUrl(objectName: string, expires: number, responseDisposition?: string) {
